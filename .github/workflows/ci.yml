@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Determine test scope from branch name
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # For PRs, head_ref is the branch name. For pushes, ref_name is branch.
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          echo "Branch: $BRANCH"
+
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "mode=main" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$BRANCH" =~ ^task_([0-9]{2})$ ]]; then
+            TASK_NUM="${BASH_REMATCH[1]}"
+            MARKER="task${TASK_NUM}"
+            echo "mode=task" >> "$GITHUB_OUTPUT"
+            echo "marker=$MARKER" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "::error::Invalid branch name '$BRANCH'. Use task_00, task_01, ... and open PR into main."
+          exit 1
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run tests (task-scoped)
+        if: steps.scope.outputs.mode == 'task'
+        run: |
+          echo "Running pytest marker: ${{ steps.scope.outputs.marker }}"
+          python -m pytest -m "${{ steps.scope.outputs.marker }}"
+
+      - name: Run tests (main branch - completed tasks only)
+        if: steps.scope.outputs.mode == 'main'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # tasks/progress.json controls which markers are expected to pass on main.
+          # Example:
+          #   { "completed_markers": ["task01", "task02"] }
+          if [[ ! -f "tasks/progress.json" ]]; then
+            echo "::error::Missing tasks/progress.json"
+            exit 1
+          fi
+
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = Path("tasks/progress.json")
+          data = json.loads(p.read_text(encoding="utf-8"))
+          markers = data.get("completed_markers", [])
+          if not isinstance(markers, list) or any(not isinstance(m, str) for m in markers):
+              raise SystemExit("completed_markers must be a list of strings")
+
+          # Build a pytest marker expression: "task01 or task02"
+          expr = " or ".join(markers)
+          print(expr)
+          PY
+
+          MARKER_EXPR="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("tasks/progress.json").read_text(encoding="utf-8"))
+          markers = data.get("completed_markers", [])
+          expr = " or ".join(markers)
+          print(expr)
+          PY
+          )"
+
+          if [[ -z "$MARKER_EXPR" ]]; then
+            echo "No completed tasks yet; skipping pytest execution on main."
+            exit 0
+          fi
+
+          echo "Running completed task markers on main: $MARKER_EXPR"
+          python -m pytest -m "$MARKER_EXPR"

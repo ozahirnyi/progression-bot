@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "tz": "Europe/Kyiv",
+  "schedule": {
+    "workdays": ["Mon", "Tue", "Wed", "Thu", "Fri"],
+    "daily_target": "2h",
+    "bonus_threshold": "3h"
+  },
+  "start_date": "2026-01-01",
+  "plan": {
+    "stages": [
+      { "name": "ProgressionBot (skeleton + UX)", "expected_hours": 30 },
+      { "name": "Python backend essentials", "expected_hours": 40 },
+      { "name": "FastAPI fundamentals (short)", "expected_hours": 30 },
+      { "name": "PostgreSQL + SQL practice", "expected_hours": 40 },
+      { "name": "Django core", "expected_hours": 60 },
+      { "name": "DRF", "expected_hours": 40 },
+      { "name": "Capstone: movie_finder on FastAPI (A + E)", "expected_hours": 70 },
+      { "name": "Buffer", "expected_hours": 20 }
+    ]
+  },
+  "entries": [
+    { "date": "2026-01-20", "duration": "2h", "note": "Mock: normal day" },
+    { "date": "2026-01-21", "duration": "1h30m", "note": "Mock: partial day" },
+    { "date": "2026-01-22", "duration": "3h", "note": "Mock: bonus day" },
+    { "date": "2026-01-24", "duration": "32m", "note": "Mock: today (short)" }
+  ]
+}
+
