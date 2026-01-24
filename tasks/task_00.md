@@ -29,6 +29,12 @@ Implement the missing logic so the bot works as an MVP:
 Open the bot in Telegram:
 - `https://t.me/progression_88_bot`
 
+### First steps after cloning
+1. Copy `.env.example` to `.env` and fill in your `BOT_TOKEN`
+2. Install dependencies: `py -m pip install -r requirements.txt`
+3. Run the bot once to verify setup: `py -m progression_bot`
+4. Read this file completely, then start with `task_01.md`
+
 ### How to run
 1) Create `.env` in repo root (never commit it).
 
