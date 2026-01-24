@@ -50,3 +50,5 @@ Example script idea (you can put it anywhere locally, don't commit if you don't 
 - If you get stuck: print the raw JSON dict first, then convert it step by step.
 - When converting durations, always store minutes as **int** (no floats).
 
+_(Note for practice PRs: this file change is intentionally small.)_
+
