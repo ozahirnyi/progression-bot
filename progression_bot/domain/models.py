@@ -38,12 +38,13 @@ class Plan:
     stages: tuple[PlanStage, ...]
 
     def total_planned_minutes(self) -> int:
-        """Total planned minutes across all stages.
+        total = 0
+        for stage in self.stages:
+            total += stage.expected_hours * 60
+        return total
 
-        TODO(student): Implement.
-        """
 
-        raise NotImplementedError
+        #raise NotImplementedError
 
 
 @dataclass(frozen=True)
