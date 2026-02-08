@@ -45,7 +45,7 @@ class Handlers:
         )
 
     def status(self) -> str:
-        state = JsonStore(path=self.fixtures_path).load()
+        state = JsonStore(self.fixtures_path).load()
         today = date.today()
         summary = compute_status(state, today)
         done_hours = summary.done_minutes / 60
@@ -62,7 +62,7 @@ class Handlers:
         return "TODO: implement /heatmap PNG (see tasks/task_06.md)\n"
 
     def last14(self) -> str:
-        return "TODO: implement /last14 (see tasks/task_05.md)\n"
+
 
     def plan(self) -> str:
         return "TODO: implement /plan (plan stages)\n"
