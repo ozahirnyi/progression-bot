@@ -12,10 +12,13 @@ Implementation notes:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, date
 from pathlib import Path
 
-from progression_bot.domain.models import State
+from progression_bot.bot.parse import parse_duration_to_minutes
+from progression_bot.domain.models import State, Schedule, Plan, PlanStage, Entry
 
+import json
 
 @dataclass(frozen=True)
 class JsonStore:
@@ -24,27 +27,83 @@ class JsonStore:
     path: Path
 
     def load(self) -> State:
-        """Load state from JSON.
-
-        TODO(student):
-- Parse dates and durations.
-- Validate schema version.
-- Return a `State` instance.
-        """
-
-        raise NotImplementedError
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        if not self.path.exists():
+            state = State(
+                version=1,
+                tz="UTC",
+                schedule=Schedule(
+                    workdays=(),
+                    daily_target_minutes=0,
+                    bonus_threshold_minutes=0,
+                ),
+                start_date=date.today(),
+                plan=Plan(stages=()),
+                entries=(),
+            )
+            self.save(state)
+            return state
+        else:
+            with open(self.path, mode="r", encoding="utf-8") as f:
+                data = json.load(f)
+                stages = []
+                entries = []
+                workdays = []
+                for stage in data["plan"]["stages"]:
+                    stages.append(PlanStage(**stage))
+                for entry in data["entries"]:
+                    entries.append(Entry(
+                        day=datetime.strptime(entry["date"], "%Y-%m-%d").date(),
+                        minutes=parse_duration_to_minutes(entry["duration"]),
+                        note=entry["note"],
+                    ))
+                for workday in data["schedule"]["workdays"]:
+                    workdays.append(workday)
+                raw_start=data.get("start_date")
+                if raw_start is None:
+                    start_date = None
+                else:
+                    start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+                state = State(
+                    version=int(data["version"]),
+                    tz=str(data["tz"]),
+                    schedule=Schedule(
+                        workdays=tuple(workdays),
+                        daily_target_minutes=parse_duration_to_minutes(data["schedule"]["daily_target"]),
+                        bonus_threshold_minutes=parse_duration_to_minutes(data["schedule"]["bonus_threshold"]),
+                    ),
+                    start_date=start_date,
+                    plan=Plan(stages=tuple(stages)),
+                    entries=tuple(entries),
+                )
+        return state
 
     def save(self, state: State) -> None:
-        """Save state to JSON (atomic).
-
-        TODO(student):
-- Ensure parent dir exists.
-- Write to temp file.
-- Replace original file atomically.
-        """
-
-        raise NotImplementedError
-
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        if state.start_date is not None:
+            start_date=state.start_date.isoformat()
+        else:
+            start_date = None
+        data={
+            "version": state.version,
+            "tz": state.tz,
+            "start_date": start_date,
+            "schedule": {
+            "workdays": list(state.schedule.workdays),
+            "daily_target": f"{state.schedule.daily_target_minutes//60}h{state.schedule.daily_target_minutes%60}m" if state.schedule.daily_target_minutes>=60 else f"{state.schedule.daily_target_minutes}m",
+            "bonus_threshold": f"{state.schedule.bonus_threshold_minutes//60}h{state.schedule.bonus_threshold_minutes%60}m" if state.schedule.bonus_threshold_minutes>=60 else f"{state.schedule.bonus_threshold_minutes}m",
+            },
+            "plan": {
+                "stages": [stage.__dict__ for stage in state.plan.stages],
+            },
+            "entries": [
+                {"date": e.day.isoformat(), "duration": f"{e.minutes//60}h{e.minutes%60}m" if e.minutes>=60 else f"{e.minutes}m", "note": e.note} for e in state.entries
+            ],
+        }
+        tmp_path = self.path.with_suffix(".tmp")
+        json_string = json.dumps(data, ensure_ascii=False, indent=2)
+        tmp_path.write_text(json_string, encoding="utf-8")
+        tmp_path.replace(self.path)
 
 def load_fixture(path: str | Path = "fixtures/mock_state.json") -> State:
     """Convenience helper for loading the fixture."""
