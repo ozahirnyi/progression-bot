@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import html
+import io
 from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
 
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
+from progression_bot.bot.heatmap_image import build_heatmap_png
 from progression_bot.bot.router import Router
+from progression_bot.storage.json_store import JsonStore
 
 
 @dataclass(frozen=True)
@@ -32,8 +37,33 @@ class TelegramBot:
             )
 
     async def _handle_text(self, update: Update, text: str) -> None:
-        response = self.router.handle(text)
-        await self._reply_pre(update, response)
+        parts = text.split()
+        if text.startswith("/heatmap"):
+            try:
+                if len(parts) == 1:
+                    weeks = None
+                elif len(parts) == 2:
+                    weeks = int(parts[1])
+                    if weeks <= 0:
+                        raise ValueError
+                else:
+                    raise ValueError
+                store = JsonStore(path=Path(self.router.handlers.fixtures_path))
+                state = store.load()
+                png = build_heatmap_png(state=state, today=date.today(), weeks=weeks)
+                if update.message is None:
+                    return
+                else:
+                    buf = io.BytesIO(png)
+                    buf.name = "heatmap.png"
+                    await update.message.reply_photo(photo=buf)
+                return
+            except ValueError:
+                await self._reply_pre(update, "Usage: /heatmap [weeks]")
+                return
+        else:
+            response = self.router.handle(text)
+            await self._reply_pre(update, response)
 
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await self._handle_text(update, "/start")

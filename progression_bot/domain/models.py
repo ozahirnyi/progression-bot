@@ -44,9 +44,6 @@ class Plan:
         return total
 
 
-        #raise NotImplementedError
-
-
 @dataclass(frozen=True)
 class Entry:
     """One day of progress."""

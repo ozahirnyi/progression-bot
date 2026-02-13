@@ -59,6 +59,11 @@ class JsonStore:
                     ))
                 for workday in data["schedule"]["workdays"]:
                     workdays.append(workday)
+                raw_start=data.get("start_date")
+                if raw_start is None:
+                    start_date = None
+                else:
+                    start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
                 state = State(
                     version=int(data["version"]),
                     tz=str(data["tz"]),
@@ -67,7 +72,7 @@ class JsonStore:
                         daily_target_minutes=parse_duration_to_minutes(data["schedule"]["daily_target"]),
                         bonus_threshold_minutes=parse_duration_to_minutes(data["schedule"]["bonus_threshold"]),
                     ),
-                    start_date=datetime.strptime(data["start_date"], "%Y-%m-%d").date(),
+                    start_date=start_date,
                     plan=Plan(stages=tuple(stages)),
                     entries=tuple(entries),
                 )
@@ -75,10 +80,14 @@ class JsonStore:
 
     def save(self, state: State) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        if state.start_date is not None:
+            start_date=state.start_date.isoformat()
+        else:
+            start_date = None
         data={
             "version": state.version,
             "tz": state.tz,
-            "start_date": state.start_date.isoformat(),
+            "start_date": start_date,
             "schedule": {
             "workdays": list(state.schedule.workdays),
             "daily_target": f"{state.schedule.daily_target_minutes//60}h{state.schedule.daily_target_minutes%60}m" if state.schedule.daily_target_minutes>=60 else f"{state.schedule.daily_target_minutes}m",
