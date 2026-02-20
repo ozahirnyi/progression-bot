@@ -30,8 +30,10 @@ def build_heatmap_png(*args, **kwargs) -> bytes:  # noqa: ANN002, ANN003
     state = kwargs.get("state") or args[0]
     today = kwargs.get("today") or args[1]
     weeks = kwargs.get("weeks", None)
+    if weeks is None:
+        weeks = kwargs.get("weeks_limit")
     if weeks is None and len(args) >= 3:
-        kwargs.get("weeks_limit")
+        weeks = args[2]
     minutes_by_day = {}
     for entry in state.entries:
         minutes_by_day[entry.day] = minutes_by_day.get(entry.day, 0) + entry.minutes
@@ -68,7 +70,7 @@ def build_heatmap_png(*args, **kwargs) -> bytes:  # noqa: ANN002, ANN003
         y1 = y0 + cell
         minutes = minutes_by_day.get(d, 0)
         status = day_status(state.schedule, state.start_date, d, today, minutes)
-        fill = colors[status]
+        fill = colors.get(status, "gray")
         draw.rectangle([x0, y0, x1, y1], fill=fill)
         if d == today:
             draw.rectangle([x0, y0, x1, y1], outline="blue", width=2)
