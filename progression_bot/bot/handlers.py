@@ -3,10 +3,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-
+from pathlib import Path
 
 from progression_bot.storage.json_store import JsonStore
-from progression_bot.use_cases.calendar import compute_status
+from progression_bot.use_cases.calendar import compute_status, last_n_days
 
 
 @dataclass(frozen=True)
@@ -45,7 +45,7 @@ class Handlers:
         )
 
     def status(self) -> str:
-        state = JsonStore(self.fixtures_path).load()
+        state = JsonStore(path=Path(self.fixtures_path)).load()
         today = date.today()
         summary = compute_status(state, today)
         done_hours = summary.done_minutes / 60
@@ -62,6 +62,26 @@ class Handlers:
         return "TODO: implement /heatmap PNG (see tasks/task_06.md)\n"
 
     def last14(self) -> str:
+        state = JsonStore(path=Path(self.fixtures_path)).load()
+        today = date.today()
+        days = last_n_days(state, today, 14)
+        lines = []
+        lines.append("Last 14 days:")
+        for day_info in days:
+            day_str = day_info.day.isoformat()
+            weekday = day_info.day.strftime("%a")
+            minutes = day_info.minutes
+            if minutes < 60:
+                duration = f"{minutes}m"
+            else:
+                duration = f"{minutes // 60}h{minutes % 60}m"
+            line = f"{day_str} {weekday} {duration} {day_info.status}"
+            if day_info.note:
+                line += f" {day_info.note}"
+            lines.append(line)
+        return "\n".join(lines)
+
+
 
 
     def plan(self) -> str:
