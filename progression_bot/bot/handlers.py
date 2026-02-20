@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-
+from pathlib import Path
 
 from progression_bot.storage.json_store import JsonStore
 from progression_bot.use_cases.calendar import compute_status
@@ -45,7 +45,7 @@ class Handlers:
         )
 
     def status(self) -> str:
-        state = JsonStore(path=self.fixtures_path).load()
+        state = JsonStore(path=Path(self.fixtures_path)).load()
         today = date.today()
         summary = compute_status(state, today)
         done_hours = summary.done_minutes / 60

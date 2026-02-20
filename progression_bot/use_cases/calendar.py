@@ -15,7 +15,13 @@ from progression_bot.domain.models import DayInfo, Plan, Schedule, State, Status
 
 def compute_status(state: State, today: date) -> StatusSummary:
     total_minutes = sum(stage.expected_hours * 60 for stage in state.plan.stages)
-    done_minutes = sum(entry.minutes for entry in state.entries)
+    if state.start_date is None:
+        done_minutes = 0
+    else:
+        done_minutes = sum(
+            entry.minutes for entry in state.entries
+            if entry.day >= state.start_date
+        )
     remaining = total_minutes - done_minutes
     if remaining <= 0:
         expected_deadline_date = today
@@ -26,6 +32,14 @@ def compute_status(state: State, today: date) -> StatusSummary:
             remaining,
             expected_deadline_date,
             days_to_finish,
+        )
+    if state.schedule.daily_target_minutes <= 0:
+        return StatusSummary(
+            total_minutes,
+            done_minutes,
+            remaining,
+            today,
+            0,
         )
     remaining_work = remaining
     expected_deadline_date = today
