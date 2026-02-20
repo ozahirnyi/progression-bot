@@ -22,7 +22,7 @@ def compute_status(state: State, today: date) -> StatusSummary:
             entry.minutes for entry in state.entries
             if entry.day >= state.start_date
         )
-    remaining = total_minutes - done_minutes
+    remaining = max(0, total_minutes - done_minutes)
     if remaining <= 0:
         expected_deadline_date = today
         days_to_finish = 0
