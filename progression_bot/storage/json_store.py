@@ -12,9 +12,10 @@ Implementation notes:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 
+from progression_bot.bot.parse import parse_duration_to_minutes
 from progression_bot.domain.models import State, Schedule, Plan, PlanStage, Entry
 
 import json
@@ -35,8 +36,8 @@ class JsonStore:
                 stages.append(PlanStage(**stage))
             for entry in data["entries"]:
                 entries.append(Entry(
-                    day=datetime.strptime(entry["date"], "%Y-%m-%d"),
-                    minutes=1, # TODO implement after parse_duration_to_minutes
+                    day=datetime.strptime(entry["date"], "%Y-%m-%d").date(),
+                    minutes=parse_duration_to_minutes(entry["duration"]),
                     note=entry["note"],
                 ))
             for workday in data["schedule"]["workdays"]:
@@ -47,10 +48,10 @@ class JsonStore:
                 tz=str(data["tz"]),
                 schedule=Schedule(
                     workdays=tuple(workdays),
-                    daily_target_minutes=1, # TODO implement after parse_duration_to_minutes
-                    bonus_threshold_minutes=1, # TODO implement after parse_duration_to_minutes
+                    daily_target_minutes=parse_duration_to_minutes(data["schedule"]["daily_target"]),
+                    bonus_threshold_minutes=parse_duration_to_minutes(data["schedule"]["bonus_threshold"]),
                 ),
-                start_date=datetime.strptime(data["start_date"], "%Y-%m-%d"),
+                start_date=datetime.strptime(data["start_date"], "%Y-%m-%d").date(),
                 plan=Plan(stages=tuple(stages)),
                 entries=tuple(entries),
             )
