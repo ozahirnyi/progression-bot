@@ -1,26 +1,26 @@
 # Task 09 — Implement `/start_progression` (Stage 2)
 
-Кожна подорож починається з одного `/start_progression`.
+Every journey begins with a single `/start_progression`.
 
-## Мета
+## Goal
 
-Користувач має мати можливість **встановити (або скинути) дату початку прогресу**. Від неї рахуються "зроблені" хвилини і "пропущені" дні. Команда: `/start_progression` або `/start_progression YYYY-MM-DD`. Якщо дата не вказана — вважати сьогоднішній день.
+The user must be able to **set (or reset) the progression start date**. This is the day from which "done" minutes and "missed" days are counted. Command: `/start_progression` or `/start_progression YYYY-MM-DD`. If no date is given, use today.
 
-## Що має вийти
+## Expected result
 
-- Після `/start_progression 2026-01-01` наступний `/status` використовує цю дату як початок (наприклад, "done" лише з 2026-01-01).
-- `/start_progression` без дати встановлює початок на сьогодні.
-- Стан зберігається у файл за `STORAGE_PATH`; після перезапуску бота дата початку зберігається.
+- After `/start_progression 2026-01-01`, the next `/status` uses that date as the start (e.g. "done" only from 2026-01-01).
+- `/start_progression` with no date sets start to today.
+- State is saved to the file at `STORAGE_PATH`; after restarting the bot the start date is preserved.
 
-## Контракт для тестів
+## Contract for tests
 
-Тести очікують у модулі `progression_bot.use_cases.progress`:
+Tests expect in `progression_bot.use_cases.progress`:
 
-- **`start_progression(state: State, start_date: date) -> State`** — повертає новий стан з `start_date` рівним заданій даті. Решту полів стану можна не змінювати або ініціалізувати мінімальні дефолти; головне — оновлений `start_date`.
+- **`start_progression(state: State, start_date: date) -> State`** — returns a new state with `start_date` set to the given date. You can leave other fields unchanged or set minimal defaults; the important part is the updated `start_date`.
 
-Як саме підключити це до команди (хендлер/роутер), як парсити опціональну дату і що виводити в чат — твоя реалізація. Якщо файлу стану ще немає — можна створити мінімальний стан (як у task_03) і вже до нього застосувати `start_progression` та зберегти.
+How you wire this to the command (handler/router), how you parse the optional date, and what you output to the user is up to you. If the state file does not exist yet, you can create minimal state (as in task_03), call `start_progression` on it, and save.
 
-## Підказки
+## Hints
 
-- State immutable: повертай новий `State(..., start_date=start_date, ...)`.
-- `JsonStore.load()` для неіснуючого шляху вже може створювати дефолтний стан; потім виклик `start_progression` і `save`.
+- State is immutable: return a new `State(..., start_date=start_date, ...)`.
+- `JsonStore.load()` for a non-existent path may already create default state; then call `start_progression` and `save`.

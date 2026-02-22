@@ -1,26 +1,26 @@
 # Task 11 — Delete entry (Stage 2, optional)
 
-Іноді найкращий лог — це відсутність логу.
+Sometimes the best log is no log.
 
-## Мета
+## Goal
 
-Дозволити користувачу **видалити залогований час за конкретний день**. Команда: `/delete YYYY-MM-DD` або `/delete yesterday`. Після цього за цей день 0 хвилин; у `/last14` день відображатиметься як missed/empty/weekend згідно з правилами.
+Let the user **remove logged time for a specific day**. Command: `/delete YYYY-MM-DD` or `/delete yesterday`. After that, that day has 0 minutes; in `/last14` it will show as missed/empty/weekend per the rules.
 
-## Що має вийти
+## Expected result
 
-- `/delete 2026-01-24` видаляє запис за цей день; `/status` та `/last14` показують оновлені дані.
-- `/delete yesterday` видаляє вчорашній запис.
-- Якщо запису за день не було — можна повернути повідомлення "No entry for that day" і не змінювати стан.
-- Команду варто додати в `/help`.
+- `/delete 2026-01-24` removes the entry for that day; `/status` and `/last14` reflect the change.
+- `/delete yesterday` removes yesterday's entry.
+- If there was no entry for that day, you can reply "No entry for that day" and leave state unchanged.
+- Add the command to `/help`.
 
-## Контракт для тестів
+## Contract for tests
 
-Тести очікують у модулі `progression_bot.use_cases.progress`:
+Tests expect in `progression_bot.use_cases.progress`:
 
-- **`delete_entry(state: State, day: date) -> State`** — повертає новий стан, у якому в `entries` немає жодного запису з `day == задана дата`. Якщо запису не було — можна повернути стан без змін.
+- **`delete_entry(state: State, day: date) -> State`** — returns a new state whose `entries` contain no entry for the given day. If there was no entry, you may return the state unchanged.
 
-Парсинг дати ("yesterday", `YYYY-MM-DD`) можна зробити аналогічно до `/log` (спільний хелпер), підключити команду в роутері, завантажити стан, викликати `delete_entry`, зберегти, відповісти підтвердженням.
+You can parse the date ("yesterday", `YYYY-MM-DD`) similarly to `/log` (shared helper), wire the command in the router, load state, call `delete_entry`, save, and reply with confirmation.
 
-## Підказки
+## Hints
 
-- Новий список записів: `tuple(e for e in state.entries if e.day != day)`.
+- New entries list: `tuple(e for e in state.entries if e.day != day)`.

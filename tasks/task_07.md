@@ -1,28 +1,28 @@
 # Task 07 — Use real storage path everywhere (Stage 2)
 
-Один файл стану для всіх команд — один JSON на диску.
+One state file to rule them all — one JSON on disk.
 
-## Мета
+## Goal
 
-Усі команди, що читають або змінюють стан бота, мають використовувати **один шлях до файлу** з конфігурації (`STORAGE_PATH`, наприклад `./data/state.json`). Тобто `/status`, `/last14`, `/plan`, `/heatmap`, а згодом `/log` та `/start_progression` працюють з одним і тим самим файлом.
+All commands that read or write bot state must use **one path from config** (`STORAGE_PATH`, e.g. `./data/state.json`). So `/status`, `/last14`, `/plan`, `/heatmap`, and later `/log` and `/start_progression` all work with the same file.
 
-## Що має вийти
+## Expected result
 
-- Після запуску бота виклик `/status` (або `/last14`, `/plan`) бере стан з `STORAGE_PATH`. Зміни у файлі (вручну або через майбутній `/log`) відображаються при наступній команді.
-- Handlers (або роутер) отримують шлях до сховища з конфігурації; у тестах можна підставляти тимчасовий шлях або фікстуру, щоб не чіпати реальні дані.
-- Якщо файл стану ще не існує, завантаження має створювати файл з дефолтним станом (як у task_03) або повертати дефолтний стан і створювати файл при першому збереженні.
+- After starting the bot, calling `/status` (or `/last14`, `/plan`) loads state from `STORAGE_PATH`. Changes to the file (by hand or via future `/log`) show up on the next command.
+- Handlers (or router) receive the storage path from config; in tests you can use a temp path or the fixture path so real data is not touched.
+- If the state file does not exist yet, loading must create a default state file (as in task_03) or return default state and create the file on first save.
 
-## Контракт для тестів
+## Contract for tests
 
-Тести перевіряють:
+Tests verify:
 
-- Що handlers (або застосунок) приймають конфігурований шлях до сховища (наприклад, передається при створенні).
-- Що завантаження з шляху, де файлу ще немає, призводить до створення дефолтного стану або створення файлу.
-- Що запис стану в тимчасовий файл і виклик handler з цим шляхом дають очікувані дані (наприклад, правильна кількість записів або `start_date`).
+- That handlers (or app) accept a configurable storage path (e.g. passed at construction).
+- That loading from a path where the file does not exist yields a default state or creates the file.
+- That writing state to a temp file and calling the handler with that path yields the expected data (e.g. correct entry count or `start_date`).
 
-Ти сам обираєш, де зберігати шлях (клас handlers, роутер, конфіг) і як передавати його в `JsonStore` — головне, щоб не було захардкодженого `fixtures/mock_state.json` для “боєвого” режиму.
+Where you store the path (handlers class, router, config) and how you pass it into `JsonStore` is up to you — just avoid hardcoded `fixtures/mock_state.json` for production.
 
-## Підказки
+## Hints
 
-- У конфігу вже є поле для шляху до сховища; у `main.py` його можна передавати при створенні Handlers/ Router.
-- Для тестів можна використовувати `tmp_path` (pytest) або окремий шлях до фікстури.
+- Config already has a field for the storage path; in `main.py` you can pass it when creating Handlers / Router.
+- For tests you can use `tmp_path` (pytest) or a separate fixture path.

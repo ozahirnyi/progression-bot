@@ -1,25 +1,25 @@
 # Task 10 — Implement `/plan` (Stage 2)
 
-План — це список етапів, поки його не виведеш. Тоді це список етапів з очікуваними годинами.
+A plan is just a list of stages until you render it. Then it's a list of stages with expected hours.
 
-## Мета
+## Goal
 
-Показувати в боті навчальний план: список етапів з назвами та очікуваними годинами. Команда: `/plan`. Дані беруться з поточного стану (той самий файл, що й для `/status` та `/log`).
+Show the learning plan in the bot: list of stages with names and expected hours. Command: `/plan`. Data comes from the current state (same file as `/status` and `/log`).
 
-## Що має вийти
+## Expected result
 
-- `/plan` повертає читабельний список етапів і очікуваних годин (опційно — загальна сума годин).
-- Якщо стан завантажено з фікстури або з JSON з етапами — вивід відповідає цим даним.
+- `/plan` returns a readable list of stages and expected hours (optionally total hours at the end).
+- If state was loaded from the fixture or JSON with stages, the output matches that data.
 
-## Контракт для тестів
+## Contract for tests
 
-Тести очікують у модулі `progression_bot.bot.render`:
+Tests expect in `progression_bot.bot.render`:
 
-- **`render_plan_text(plan: Plan) -> str`** — приймає `Plan`, повертає рядок, у якому є назва кожного етапу та відповідні очікувані години (наприклад, "1. ProgressionBot — 30 h", "2. Python backend — 40 h"). У тексті не має бути "TODO" або "implement" (тести пропустять заглушку).
+- **`render_plan_text(plan: Plan) -> str`** — takes a `Plan`, returns a string that includes each stage's name and expected hours (e.g. "1. ProgressionBot — 30 h", "2. Python backend — 40 h"). The text must not contain "TODO" or "implement" (tests will skip a stub).
 
-Структуру даних плану (`state.plan`, `Plan`, `PlanStage` з `name` та `expected_hours`) можна брати з домену; окремого use case для `/plan` не обов’язково — достатньо завантажити стан, взяти `state.plan` і викликати `render_plan_text(state.plan)` у хендлері.
+You can use the plan data shape from the domain (`state.plan`, `Plan`, `PlanStage` with `name` and `expected_hours`); a separate use case for `/plan` is not required — load state, take `state.plan`, and call `render_plan_text(state.plan)` in the handler.
 
-## Підказки
+## Hints
 
-- `Plan` має `stages: tuple[PlanStage, ...]`, `PlanStage` — `name: str`, `expected_hours: int`.
-- Опційно в кінці вивести суму запланованих годин (наприклад, через `plan.total_planned_minutes()` якщо є такий метод).
+- `Plan` has `stages: tuple[PlanStage, ...]`, `PlanStage` has `name: str` and `expected_hours: int`.
+- Optionally show total planned hours at the end (e.g. via `plan.total_planned_minutes()` if that exists).
