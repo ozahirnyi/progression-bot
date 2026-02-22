@@ -1,8 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 
-from progression_bot.bot import render
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta
+from pathlib import Path
+
+from progression_bot.storage.json_store import JsonStore
+from progression_bot.use_cases.calendar import compute_status
 
 
 @dataclass(frozen=True)
@@ -41,7 +45,18 @@ class Handlers:
         )
 
     def status(self) -> str:
-        return "TODO: implement /status (see tasks/task_04.md)\n"
+        state = JsonStore(path=Path(self.fixtures_path)).load()
+        today = date.today()
+        summary = compute_status(state, today)
+        done_hours = summary.done_minutes / 60
+        total_hours = summary.total_minutes / 60
+        remaining_hours = summary.remaining_minutes / 60
+        return (
+            f"Days to finish: {summary.days_to_finish}\n"
+            f"Expected deadline: {summary.expected_deadline_date.isoformat()}\n"
+            f"Hours done / total / remaining: "
+            f"{done_hours:.1f} / {total_hours:.1f} / {remaining_hours:.1f}"
+        )
 
     def heatmap(self, text: str) -> str:
         return "TODO: implement /heatmap PNG (see tasks/task_06.md)\n"

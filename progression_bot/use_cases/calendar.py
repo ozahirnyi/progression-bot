@@ -8,22 +8,54 @@ This module contains computations used by:
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 from progression_bot.domain.models import DayInfo, Plan, Schedule, State, StatusSummary
 
 
 def compute_status(state: State, today: date) -> StatusSummary:
-    """Compute values for `/status`.
-
-    TODO(student): Implement using:
-    - plan total planned minutes
-    - logged done minutes since start_date
-    - projection on future workdays
-    """
-
-    raise NotImplementedError
-
+    total_minutes = sum(stage.expected_hours * 60 for stage in state.plan.stages)
+    if state.start_date is None:
+        done_minutes = 0
+    else:
+        done_minutes = sum(
+            entry.minutes for entry in state.entries
+            if entry.day >= state.start_date
+        )
+    remaining = max(0, total_minutes - done_minutes)
+    if remaining <= 0:
+        expected_deadline_date = today
+        days_to_finish = 0
+        return StatusSummary(
+            total_minutes,
+            done_minutes,
+            remaining,
+            expected_deadline_date,
+            days_to_finish,
+        )
+    if state.schedule.daily_target_minutes <= 0:
+        return StatusSummary(
+            total_minutes,
+            done_minutes,
+            remaining,
+            today,
+            0,
+        )
+    remaining_work = remaining
+    expected_deadline_date = today
+    days_to_finish = 0
+    while remaining_work > 0:
+        expected_deadline_date += timedelta(days=1)
+        if expected_deadline_date.weekday() < 5:
+            remaining_work -= state.schedule.daily_target_minutes
+    days_to_finish = (expected_deadline_date - today).days
+    return StatusSummary(
+        total_minutes,
+        done_minutes,
+        remaining,
+        expected_deadline_date,
+        days_to_finish,
+    )
 
 def last_n_days(state: State, today: date, n: int = 14) -> tuple[DayInfo, ...]:
     """Build `/last14` data.
