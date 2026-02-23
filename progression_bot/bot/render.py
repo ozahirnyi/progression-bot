@@ -43,13 +43,7 @@ def render_last14_text(days: tuple[DayInfo, ...]) -> str:
     return "TODO: implement /last14 (last 14 days details)\n"
 
 
-def render_plan_text(plan: Plan) -> str:
-    """Render `/plan` text.
-
-    TODO(student): Read plan stages from fixtures and render with expected hours.
-    """
-
-    return "TODO: implement /plan (plan stages)\n"
+# render_plan_text(plan: Plan) -> str — you implement this for task_10 (see tasks/task_10.md)
 
 
 def render_heatmap_caption(today: date, weeks_limit: int | None) -> str:

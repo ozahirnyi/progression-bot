@@ -44,6 +44,7 @@ class Plan:
         return total
 
 
+
 @dataclass(frozen=True)
 class Entry:
     """One day of progress."""

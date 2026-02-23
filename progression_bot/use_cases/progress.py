@@ -1,9 +1,12 @@
 """Progress tracking use-cases (student-owned).
 
-This module contains *pure operations* on `State`:
-- start progression (set start date)
-- log time (add minutes to a day)
-- edit or delete entries
+This module should contain pure operations on State:
+- start_progression(state, start_date) -> State  (task_09)
+- log_time(state, req: LogRequest) -> State     (task_08)
+- upsert_entry(state, entry: Entry) -> State    (task_08)
+- delete_entry(state, day: date) -> State       (task_11)
+
+See tasks/task_08.md, task_09.md, task_11.md. No skeleton implementations — you add these.
 """
 
 from __future__ import annotations
@@ -16,45 +19,7 @@ from progression_bot.domain.models import Entry, State
 
 @dataclass(frozen=True)
 class LogRequest:
+    """Request to log time for a day (used by task_08 tests and your log handler)."""
     day: date
     minutes: int
     note: str | None = None
-
-
-def start_progression(state: State, start_date: date) -> State:
-    """Initialize progression start date.
-
-    TODO(student): Implement.
-    """
-
-    raise NotImplementedError
-
-
-def log_time(state: State, req: LogRequest) -> State:
-    """Add logged minutes to the given day.
-
-    Suggested default rule: same-day entries are *summed*.
-
-    TODO(student): Implement.
-    """
-
-    raise NotImplementedError
-
-
-def upsert_entry(state: State, entry: Entry) -> State:
-    """Insert or update an entry for `entry.day`.
-
-    TODO(student): Implement.
-    """
-
-    raise NotImplementedError
-
-
-def delete_entry(state: State, day: date) -> State:
-    """Remove entry for the given day (if exists).
-
-    TODO(student): Implement.
-    """
-
-    raise NotImplementedError
-
