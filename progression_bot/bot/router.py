@@ -34,9 +34,8 @@ class Router:
         if text.startswith("/plan"):
             return self.handlers.plan()
 
-        # Skeleton: accept /log commands (TODO implementation).
         if text.startswith("/log") or text.startswith("/logy"):
-            return self.handlers.log_readonly(text=text)
+            return self.handlers.log(text=text)
         if text.startswith("/start_progression"):
             return self.handlers.start_progression_readonly()
 

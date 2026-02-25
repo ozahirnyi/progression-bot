@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+from progression_bot.bot.parse import parse_log_command
 from progression_bot.storage.json_store import JsonStore
 from progression_bot.use_cases.calendar import compute_status, last_n_days
+from progression_bot.use_cases.progress import log_time
 
 
 @dataclass(frozen=True)
@@ -87,17 +89,16 @@ class Handlers:
     def start_progression_readonly(self) -> str:
         return "TODO: implement /start_progression (initialize state)\n"
 
-    def log_readonly(self, text: str) -> str:
-        return (
-            "TODO: implement /log (time logging)\n\n"
-            "Supported examples:\n"
-            "- /log 2h\n"
-            "- /log 32m\n"
-            "- /log 1h30m\n"
-            "- /log yesterday 45m\n"
-            "- /log 2026-01-23 2h\n"
-            "- /logy 1h\n"
-        )
+    def log(self, text: str) -> str:
+        store = JsonStore(Path(self.storage_path))
+        state = store.load()
+        try:
+            req = parse_log_command(text)
+            new_state = log_time(state, req)
+            store.save(new_state)
+            return f"Logged {req.minutes}m for {req.day}"
+        except (ValueError, TypeError):
+            return "Usage: /log 2h or /log yesterday 45m"
 
     def unknown(self, text: str) -> str:
         return f"Unknown command: {text}\n\nType /help"
