@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-
+import dataclasses
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -22,7 +22,7 @@ class Handlers:
     - `tasks/task_00.md`
     """
 
-    fixtures_path: str = "fixtures/mock_state.json"
+    fixtures_path: str
 
     def start(self) -> str:
         return self.help()
@@ -80,9 +80,6 @@ class Handlers:
                 line += f" {day_info.note}"
             lines.append(line)
         return "\n".join(lines)
-
-
-
 
     def plan(self) -> str:
         return "TODO: implement /plan (plan stages)\n"
