@@ -9,7 +9,7 @@ from progression_bot.bot.parse import parse_log_command
 from progression_bot.storage.json_store import JsonStore
 from progression_bot.use_cases.calendar import compute_status, last_n_days
 from progression_bot.use_cases.progress import log_time
-
+from progression_bot.use_cases.progress import start_progression
 
 @dataclass(frozen=True)
 class Handlers:
@@ -86,8 +86,22 @@ class Handlers:
     def plan(self) -> str:
         return "TODO: implement /plan (plan stages)\n"
 
-    def start_progression_readonly(self) -> str:
-        return "TODO: implement /start_progression (initialize state)\n"
+    def start_progression(self, text: str) -> str:
+        parts = text.split()
+        try:
+            if len(parts) == 1:
+                day = date.today()
+            elif len(parts) == 2:
+                day = date.fromisoformat(parts[1])
+            else:
+                return "Usage: /start_progression <day>"
+        except ValueError:
+            return "Usage: /start_progression <day>"
+        store = JsonStore(path=Path(self.fixtures_path))
+        state = store.load()
+        new_state = start_progression(state, day)
+        store.save(new_state)
+        return f"Start date set to {day.isoformat()}"
 
     def log(self, text: str) -> str:
         store = JsonStore(Path(self.storage_path))

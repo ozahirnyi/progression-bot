@@ -37,7 +37,7 @@ class Router:
         if text.startswith("/log") or text.startswith("/logy"):
             return self.handlers.log(text=text)
         if text.startswith("/start_progression"):
-            return self.handlers.start_progression_readonly()
+            return self.handlers.start_progression(text=text)
 
         return self.handlers.unknown(text=text)
 

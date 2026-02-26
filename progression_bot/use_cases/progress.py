@@ -34,7 +34,7 @@ def upsert_entry(state: State, entry: Entry) -> State:
             replaced = True
         else:
             new_entries.append(e)
-    if replaced is False:
+    if  not replaced:
         new_entries.append(entry)
     new_entries_tuple = tuple(new_entries)
     return dataclasses.replace(state, entries=new_entries_tuple)
@@ -56,3 +56,7 @@ def log_time(state: State, req: LogRequest) -> State:
             note = None
     new_entry = Entry(day=req.day, minutes=new_total, note=note)
     return upsert_entry(state, new_entry)
+
+def start_progression(state: State, start_date: date) -> State:
+
+    return dataclasses.replace(state, start_date=start_date)
