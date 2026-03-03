@@ -6,6 +6,7 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 
 from progression_bot.bot.parse import parse_log_command
+from progression_bot.bot.render import render_plan_text
 from progression_bot.storage.json_store import JsonStore
 from progression_bot.use_cases.calendar import compute_status, last_n_days
 from progression_bot.use_cases.progress import log_time
@@ -84,7 +85,9 @@ class Handlers:
         return "\n".join(lines)
 
     def plan(self) -> str:
-        return "TODO: implement /plan (plan stages)\n"
+        store = JsonStore(path=Path(self.fixtures_path))
+        state = store.load()
+        return render_plan_text(state.plan)
 
     def start_progression(self, text: str) -> str:
         parts = text.split()
