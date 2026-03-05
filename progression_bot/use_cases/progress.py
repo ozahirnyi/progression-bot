@@ -60,3 +60,11 @@ def log_time(state: State, req: LogRequest) -> State:
 def start_progression(state: State, start_date: date) -> State:
 
     return dataclasses.replace(state, start_date=start_date)
+
+def delete_entry(state: State, day: date) -> State:
+    new_entries = tuple(e for e in state.entries if e.day != day)
+    if len(new_entries) == len(state.entries):
+        return state
+    else:
+        return dataclasses.replace(state, entries=new_entries)
+    

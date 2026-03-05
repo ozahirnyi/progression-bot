@@ -39,5 +39,8 @@ class Router:
         if text.startswith("/start_progression"):
             return self.handlers.start_progression(text=text)
 
+        if text.startswith("/delete"):
+            return self.handlers.delete(text=text)
+
         return self.handlers.unknown(text=text)
 
