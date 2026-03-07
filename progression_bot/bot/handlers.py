@@ -5,9 +5,12 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
+from progression_bot.bot.parse import parse_log_command
+from progression_bot.bot.render import render_plan_text
 from progression_bot.storage.json_store import JsonStore
 from progression_bot.use_cases.calendar import compute_status, last_n_days
-
+from progression_bot.use_cases.progress import log_time
+from progression_bot.use_cases.progress import start_progression
 
 @dataclass(frozen=True)
 class Handlers:
@@ -82,22 +85,37 @@ class Handlers:
         return "\n".join(lines)
 
     def plan(self) -> str:
-        return "TODO: implement /plan (plan stages)\n"
+        store = JsonStore(path=Path(self.fixtures_path))
+        state = store.load()
+        return render_plan_text(state.plan)
 
-    def start_progression_readonly(self) -> str:
-        return "TODO: implement /start_progression (initialize state)\n"
+    def start_progression(self, text: str) -> str:
+        parts = text.split()
+        try:
+            if len(parts) == 1:
+                day = date.today()
+            elif len(parts) == 2:
+                day = date.fromisoformat(parts[1])
+            else:
+                return "Usage: /start_progression <day>"
+        except ValueError:
+            return "Usage: /start_progression <day>"
+        store = JsonStore(path=Path(self.fixtures_path))
+        state = store.load()
+        new_state = start_progression(state, day)
+        store.save(new_state)
+        return f"Start date set to {day.isoformat()}"
 
-    def log_readonly(self, text: str) -> str:
-        return (
-            "TODO: implement /log (time logging)\n\n"
-            "Supported examples:\n"
-            "- /log 2h\n"
-            "- /log 32m\n"
-            "- /log 1h30m\n"
-            "- /log yesterday 45m\n"
-            "- /log 2026-01-23 2h\n"
-            "- /logy 1h\n"
-        )
+    def log(self, text: str) -> str:
+        store = JsonStore(Path(self.storage_path))
+        state = store.load()
+        try:
+            req = parse_log_command(text)
+            new_state = log_time(state, req)
+            store.save(new_state)
+            return f"Logged {req.minutes}m for {req.day}"
+        except (ValueError, TypeError):
+            return "Usage: /log 2h or /log yesterday 45m"
 
     def unknown(self, text: str) -> str:
         return f"Unknown command: {text}\n\nType /help"

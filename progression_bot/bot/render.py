@@ -43,8 +43,12 @@ def render_last14_text(days: tuple[DayInfo, ...]) -> str:
     return "TODO: implement /last14 (last 14 days details)\n"
 
 
-# render_plan_text(plan: Plan) -> str — you implement this for task_10 (see tasks/task_10.md)
-
+def render_plan_text(plan: Plan) -> str:
+    lines = []
+    for index, stage in enumerate(plan.stages, start=1):
+        line = f"{index}. {stage.name} — {stage.expected_hours} h"
+        lines.append(line)
+    return "\n".join(lines)
 
 def render_heatmap_caption(today: date, weeks_limit: int | None) -> str:
     """Caption for heatmap image.
