@@ -56,3 +56,7 @@ def log_time(state: State, req: LogRequest) -> State:
             note = None
     new_entry = Entry(day=req.day, minutes=new_total, note=note)
     return upsert_entry(state, new_entry)
+
+def start_progression(state: State, start_date: date) -> State:
+
+    return dataclasses.replace(state, start_date=start_date)
