@@ -35,7 +35,7 @@ def main() -> int:
 
     cfg = load_config()
 
-    handlers = Handlers(fixtures_path="fixtures/mock_state.json")
+    handlers = Handlers(fixtures_path=cfg.storage_path)
     router = Router(handlers=handlers)
 
     if cfg.bot_token and not args.cli:
