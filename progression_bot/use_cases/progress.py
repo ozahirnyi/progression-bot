@@ -12,7 +12,7 @@ See tasks/task_08.md, task_09.md, task_11.md. No skeleton implementations — yo
 from __future__ import annotations
 
 import dataclasses
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import date
 
 from progression_bot.domain.models import Entry, State
@@ -34,7 +34,7 @@ def upsert_entry(state: State, entry: Entry) -> State:
             replaced = True
         else:
             new_entries.append(e)
-    if  not replaced:
+    if not replaced:
         new_entries.append(entry)
     new_entries_tuple = tuple(new_entries)
     return dataclasses.replace(state, entries=new_entries_tuple)
@@ -60,3 +60,10 @@ def log_time(state: State, req: LogRequest) -> State:
 def start_progression(state: State, start_date: date) -> State:
 
     return dataclasses.replace(state, start_date=start_date)
+
+def delete_entry(state: State, day: date) -> State:
+    new_entries = tuple(e for e in state.entries if e.day != day)
+    if len(new_entries) == len(state.entries):
+        return state
+    else:
+        return dataclasses.replace(state, entries=new_entries)
