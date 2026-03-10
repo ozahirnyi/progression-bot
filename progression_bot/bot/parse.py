@@ -32,8 +32,8 @@ def parse_duration_to_minutes(raw: str) -> int:
         raw = raw.split("m", 1)[1]
     if raw.strip():
         raise ValueError("Invalid format")
-    if minutes_total <= 0:
-        raise ValueError("Minutes must be > 0")
+    if minutes_total < 0:
+        raise ValueError("Minutes must be >= 0")
     return minutes_total
 
 
