@@ -22,9 +22,6 @@ Examples:
   /log yesterday 32m
 
 Type /quit to exit.
-
-See tasks:
-  tasks/task_00.md
 """
 
 
