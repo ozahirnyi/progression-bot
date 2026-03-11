@@ -34,7 +34,6 @@ class Handlers:
         return (
             "ProgressionBot (skeleton)\n\n"
             f"Fixture: {self.fixtures_path}\n"
-            "Task spec: tasks/task_00.md\n\n"
             "Commands:\n"
             "- /status\n"
             "- /heatmap [weeks]\n"
@@ -89,6 +88,8 @@ class Handlers:
     def plan(self) -> str:
         store = JsonStore(path=Path(self.fixtures_path))
         state = store.load()
+        if not state.plan:
+            return "No plan configured"
         return render_plan_text(state.plan)
 
     def start_progression(self, text: str) -> str:
@@ -113,6 +114,8 @@ class Handlers:
         state = store.load()
         try:
             cmd = parse_log_command(text, date.today())
+            if cmd.day > date.today():
+                return "Cannot log time for a future date"
             req = LogRequest(day=cmd.day, minutes=cmd.minutes, note=cmd.note)
             new_state = log_time(state, req)
             store.save(new_state)
