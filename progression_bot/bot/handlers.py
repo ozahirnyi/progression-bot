@@ -90,7 +90,10 @@ class Handlers:
         state = store.load()
         if not state.plan:
             return "No plan configured"
-        return render_plan_text(state.plan)
+        text = render_plan_text(state.plan)
+        if not text.strip():
+            return "No plan configured"
+        return text
 
     def start_progression(self, text: str) -> str:
         parts = text.split()
