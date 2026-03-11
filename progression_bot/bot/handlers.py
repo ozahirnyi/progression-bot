@@ -130,6 +130,8 @@ class Handlers:
         parts = text.split()
         if len(parts) != 2:
             return "Usage: /delete <day>"
+        if parts[1] == "today":
+            day = date.today()
         elif parts[1] == "yesterday":
             day = date.today() - timedelta(days=1)
         else:
